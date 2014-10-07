@@ -1,0 +1,29 @@
+This is Perl module WebService::TeamSpirit.
+
+INSTALLATION
+
+WebService::TeamSpirit installation is straightforward. If your git is set up,
+you should just be able to do
+
+    % cpan WebService::TeamSpirit
+    % git clone https://Likk@github.com/Likk/WebService-TeamSpirit.git ./
+
+Download it, unpack it, then build it as per the usual:
+
+    % cd WebService-TeamSpirit.git
+    % perl Makefile.PL
+    % make && make test
+
+Then install it:
+
+    % make install
+
+DOCUMENTATION
+
+WebService::TeamSpirit documentation is available as in POD. So you can do:
+
+    % perldoc WebService::TeamSpirit
+
+to read the documentation online with your favorite pager.
+
+likkradyus
