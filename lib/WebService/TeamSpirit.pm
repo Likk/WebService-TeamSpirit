@@ -32,6 +32,7 @@ use utf8;
 use Carp;
 use Encode;
 use JSON::XS qw/encode_json decode_json/;
+use HTTP::Date;
 use Try::Tiny;
 use URI;
 use Web::Scraper;
@@ -303,7 +304,7 @@ chatter の発言もってくる
 sub friends_timeline {
     my $self = shift;
     my $args = shift || {};
-    my $page = $args->{page} || 1;
+    my $page = 1; #$args->{page} || 1;
     $self->get($self->conf->{chatter});
 
     my $tl   = [];
@@ -384,7 +385,7 @@ sub _parse_tl {
 
     my $scraper = scraper {
         process '//div[@class="cxfeeditem feeditem"]', 'data[]'=> scraper {
-            process '//div[@class="topics init"',                   post_id     => '@data-entityid';
+            process '//div[@class="topics "]',                  post_id     => '@data-entityid';
             process '//span[@class="feeditemfirstentity"]',         username    => 'TEXT';
             process '//span[@class="feeditemfirstentity"]/a',       userid      => '@href';
             process '//span[@class="feeditemtext cxfeeditemtext"]', description => 'TEXT';
@@ -395,16 +396,75 @@ sub _parse_tl {
     my $result = $scraper->scrape($html);
     my $tl = [];
     for my $row (@$result){
+        my $timestamp = $row->{timestamp};
+        $timestamp    = HTTP::Date::str2time($self->_parse_date($timestamp));
         my $line = {
             userid => [ split '/', $row->{userid} ]->[1],
             description => $row->{description},
             username    => $row->{username},
-            timestamp   => $row->{timestamp},
+            timestamp   => $timestamp,
             post_id     => $row->{post_id},
         };
-        push @$tl, $row;
+        push @$tl, $line;
     }
     return $tl;
+}
+
+=item B<__parse_date>
+
+昨日(10:10) みたいなフォーマットで出力されるので
+適切な形式に直す
+
+=cut
+
+sub _parse_date {
+    my $self      = shift;
+    my $timestamp = shift;
+    my $datetime  = '';
+    my $date_sub = 0;
+    my $no_date  = 0;
+
+
+    if($timestamp =~ m{今日}){
+        $timestamp =~ s{今日}{};
+        $no_date = 1;
+    }
+    elsif($timestamp =~ m{(\d)\s日前}){
+        $timestamp =~ s{(\d)\s日前}{};
+        $date_sub  = $1;
+        $no_date   = 1;
+    }
+    elsif($timestamp =~ m{昨日}){
+        $timestamp =~ s{昨日}{};
+        $date_sub  = 1;
+        $no_date   = 1;
+    }
+
+    if($no_date){
+        my $now = time();
+        if($timestamp =~m{\((\d{1,2}):(\d{2})\)}){
+            my ($hour, $min) =($1, $2);
+            $now = $now - (60 * 60 * 24 * $date_sub);
+            my (undef, undef, undef, $mday, $mon, $year,) = localtime($now);
+            my $datetime = sprintf("%s-%02d-%02d %02d:%02d:00", (
+                    $year+1900,
+                    $mon +1,
+                    $mday,
+                    $hour,
+                    $min
+                )
+            );
+        }
+        else{
+            die 'cant parse date';
+        }
+    }
+    else{
+        $timestamp =~ s{/}{-}g;
+        $timestamp =~ s{\(}{ };
+        $timestamp =~ s{\)}{};
+        $datetime  = $timestamp . ':00';
+    }
 }
 
 =item B<_sleep_interval>

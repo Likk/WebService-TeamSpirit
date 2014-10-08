@@ -6,6 +6,7 @@ use FindBin;
 use lib "$FindBin::RealBin/../lib";
 use Config::Pit;
 use Encode;
+use HTTP::Date qw/time2iso/;
 use WebService::TeamSpirit;
 
 my $ts = sub { #prepare
@@ -28,7 +29,7 @@ for my $row (@$tl){
     next if $row->{description} =~ m{^\((出社打刻|退社打刻)\)$};
 
     say Encode::encode_utf8(sprintf("%s %s:「%s」",
-          $row->{timestamp},
+          time2iso($row->{timestamp}),
           $row->{username},
           $row->{description},
     ));
