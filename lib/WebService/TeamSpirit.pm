@@ -390,6 +390,7 @@ sub _parse_tl {
             process '//span[@class="feeditemfirstentity"]/a',       userid      => '@href';
             process '//span[@class="feeditemtext cxfeeditemtext"]', description => 'TEXT';
             process '//a[@class="feeditemtimestamp"]',              timestamp   => 'TEXT';
+            process '//span[@class="collaborationGroupMru"]/img',   is_group    => '@alt';
         };
         result 'data';
     };
@@ -405,6 +406,10 @@ sub _parse_tl {
             timestamp   => $timestamp,
             post_id     => $row->{post_id},
         };
+        if($row->{is_group} and
+           $row->{is_group} eq 'グループ'){
+            $line->{is_group} = 1;
+        }
         push @$tl, $line;
     }
     return $tl;

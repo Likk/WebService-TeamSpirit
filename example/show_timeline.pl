@@ -27,6 +27,7 @@ my $tl = $ts->friends_timeline({ page => 5 }); #5ページ前までさかのぼ�
 for my $row (@$tl){
     # 打刻メッセージとか別に見たくない
     next if $row->{description} =~ m{^\((出社打刻|退社打刻)\)$};
+    next if $row->{is_group};
 
     say Encode::encode_utf8(sprintf("%s %s:「%s」",
           time2iso($row->{timestamp}),
