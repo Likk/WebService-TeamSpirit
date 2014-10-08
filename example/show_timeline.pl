@@ -9,7 +9,7 @@ use Encode;
 use WebService::TeamSpirit;
 
 my $ts = sub { #prepare
-  lcoal $ENV{EDITOR} = 'vi';
+  local $ENV{EDITOR} = 'vi';
   my $pit = pit_get('teamspirit.cloudforce.com', require => {
       email     => 'your email    on teamspirit.cloudforce.com',
       password  => 'your password on teamspirit.cloudforce.com',
@@ -22,7 +22,7 @@ my $ts = sub { #prepare
 }->();
 
 my $res = $ts->login();
-my $tl = $ts->friends_timeline({ page => 10 }); #5ページ前までさかのぼる // 直接5ページ前を指定することは多分無理;
+my $tl = $ts->friends_timeline({ page => 5 }); #5ページ前までさかのぼる // 直接5ページ前を指定することは多分無理;
 for my $row (@$tl){
     # 打刻メッセージとか別に見たくない
     next if $row->{description} =~ m{^\((出社打刻|退社打刻)\)$};
