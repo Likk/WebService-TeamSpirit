@@ -382,10 +382,9 @@ sub _get_next_feed_item {
 sub _parse_tl {
     my $self = shift;
     my $html = shift;
-
     my $scraper = scraper {
-        process '//div[@class="cxfeeditem feeditem"]', 'data[]'=> scraper {
-            process '//div[@class="topics "]',                  post_id     => '@data-entityid';
+        process 'div.feeditem', 'data[]'=> scraper {
+            process 'div.topics',                                   post_id     => '@data-entityid';
             process '//span[@class="feeditemfirstentity"]',         username    => 'TEXT';
             process '//span[@class="feeditemfirstentity"]/a',       userid      => '@href';
             process '//span[@class="feeditemtext cxfeeditemtext"]', description => 'TEXT';
