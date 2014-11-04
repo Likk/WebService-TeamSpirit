@@ -303,8 +303,8 @@ chatter の発言もってくる
 
 sub friends_timeline {
     my $self = shift;
-    my $args = shift || {};
-    my $page = 1; #$args->{page} || 1;
+    my $args = shift         || {};
+    my $page = $args->{page} || 1;
     $self->get($self->conf->{chatter});
 
     my $tl   = [];
